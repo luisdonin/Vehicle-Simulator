@@ -1,254 +1,194 @@
-import javax.swing.*;
-import java.awt.event.*;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
 
 public class carro {
-    
-    public static class car {
-        private String modelo;
+    public static void main(String[] args) {
+        CarroEsportivo carroEsportivo = new CarroEsportivo();
+        CarroSedan carroSedan = new CarroSedan();
+        JFrame frame = new JFrame("Carros");
+        JPanel panel = new JPanel();
+        JTextField textField = new JTextField(10);
+        JButton button = new JButton("OK");
+        panel.add(textField);
+        panel.add(button);
+        frame.add(panel);
+        frame.pack();
+        frame.setVisible(true);
 
-        
-        public car(String modelo) {
-            this.modelo = modelo;
+        button.addActionListener(e -> {
+            int opcao = Integer.parseInt(textField.getText());
+            switch (opcao) {
+                case 1:
+                    JOptionPane.showMessageDialog(null, "Carro Esportivo selecionado.");
+                    while (true) {
+                        int acao = Integer.parseInt(JOptionPane.showInputDialog("Escolha uma ação:\n1 - Andar\n2 - Abastecer\n3 - Arrumar freios\n0 - Voltar"));
+                        if (acao == 0) {
+                            break;
+                        }
+                        switch (acao) {
+                            case 1:
+                                double distancia = Double.parseDouble(JOptionPane.showInputDialog("Digite a distância em Km: "));
+                                double velocidade = Double.parseDouble(JOptionPane.showInputDialog("Digite a velocidade em Km/h: "));
+                                carroEsportivo.andar(distancia, velocidade);
+                                break;
+                            case 2:
+                                double quantidade = Double.parseDouble(JOptionPane.showInputDialog("Digite a quantidade de combustível em litros: "));
+                                String tipo = JOptionPane.showInputDialog("Digite o tipo de combustível (Gasolina, Álcool ou Diesel): ");
+                                carroEsportivo.abastecer(quantidade, tipo);
+                                break;
+                            case 3:
+                                carroEsportivo.arrumarFreios();
+                                break;
+                            default:
+                                JOptionPane.showMessageDialog(null, "Opção inválida.");
+                                break;
+                        }
+                    }
+                    break;
+                case 2:
+                    JOptionPane.showMessageDialog(null, "Carro Sedan selecionado.");
+                    while (true) {
+                        int acao = Integer.parseInt(JOptionPane.showInputDialog("Escolha uma ação:\n1 - Andar\n2 - Abastecer\n3 - Arrumar freios\n0 - Voltar"));
+                        if (acao == 0) {
+                            break;
+                        }
+                        switch (acao) {
+                            case 1:
+                                double distancia = Double.parseDouble(JOptionPane.showInputDialog("Digite a distância em Km: "));
+                                double velocidade = Double.parseDouble(JOptionPane.showInputDialog("Digite a velocidade em Km/h: "));
+                                carroSedan.andar(distancia, velocidade);
+                                break;
+                            case 2:
+                                double quantidade = Double.parseDouble(JOptionPane.showInputDialog("Digite a quantidade de combustível em litros: "));
+                                String tipo = JOptionPane.showInputDialog("Digite o tipo de combustível (Gasolina, Álcool ou Diesel): ");
+                                carroSedan.abastecer(quantidade, tipo);
+                                break;
+                            case 3:
+                                carroSedan.arrumarFreios();
+                                break;
+                            default:
+                                JOptionPane.showMessageDialog(null, "Opção inválida.");
+                                break;
+                        }
+                    }
+                    break;
+                default:
+                    JOptionPane.showMessageDialog(null, "Opção inválida.");
+                    break;
+            }
+        });
+    }
+}
+
+class Carro {
+    protected double quilometragem;
+    protected double nivelCombustivel;
+    protected String tipoCombustivel;
+    protected boolean freiosOk;
+
+    public Carro() {
+        this.quilometragem = 0;
+        this.nivelCombustivel = 1;
+        this.tipoCombustivel = "Gasolina";
+        this.freiosOk = true;
+    }
+
+    public void andar(double distancia, double velocidade) {
+        if (!freiosOk) {
+            JOptionPane.showMessageDialog(null, "Os freios precisam ser arrumados antes de andar.");
+            return;
         }
 
-       
-        public String getmodelo() {
-            return modelo;
+        double consumo = 0;
+        if (this instanceof CarroEsportivo) {
+            if (velocidade < 120) {
+                consumo = distancia / 10;
+            } else {
+                consumo = distancia / 5;
+            }
+        } else if (this instanceof CarroSedan) {
+            if (velocidade < 100) {
+                consumo = distancia / 25;
+            } else {
+                consumo = distancia / 10;
+                if (velocidade > 99) {
+                    consumo *= 2;
+                }
+            }
         }
 
-        public void setmodelo(String modelo) {
-            this.modelo = modelo;
+        if (consumo > nivelCombustivel) {
+            JOptionPane.showMessageDialog(null, "Não há combustível suficiente para andar essa distância.");
+            return;
         }
 
-        public String drive(int distance, int speed) {
-            return "Você dirigiu seu carro " + modelo + " por " + distance + " quilometros em uma velocidade de " + speed + " km/h.";
+        quilometragem += distancia;
+        nivelCombustivel -= consumo;
+        JOptionPane.showMessageDialog(null, "Andou " + distancia + " Km a " + velocidade + " Km/h.\nConsumo: " + consumo + " litros.\nQuilometragem total: " + quilometragem + " Km.\nNível de combustível: " + nivelCombustivel + " litros.");
+    }
+
+    public void abastecer(double quantidade, String tipo) {
+        if (!tipoCombustivel.equals(tipo)) {
+            nivelCombustivel = 0;
+            tipoCombustivel = tipo;
         }
 
-        public String fuel(String modeloCombustivel) {
-            return "Você abasteceu seu carro " + modelo + " com " + modeloCombustivel + ".";
+        if (tipo.equals("Gasolina") && nivelCombustivel + quantidade > 80) {
+            JOptionPane.showMessageDialog(null, "O tanque não comporta essa quantidade de gasolina.");
+            return;
+        } else if (tipo.equals("Álcool") && nivelCombustivel + quantidade > 80) {
+            JOptionPane.showMessageDialog(null, "O tanque não comporta essa quantidade de álcool.");
+            return;
+        } else if (tipo.equals("Diesel") && nivelCombustivel + quantidade > 80) {
+            JOptionPane.showMessageDialog(null, "O tanque não comporta essa quantidade de diesel.");
+            return;
         }
 
+        nivelCombustivel += quantidade;
+        JOptionPane.showMessageDialog(null, "Abasteceu " + quantidade + " litros de " + tipo + ".\nNível de combustível: " + nivelCombustivel + " litros.");
+    }
 
-        public double getConsumption() {
-            return 0;
+    public void arrumarFreios() {
+        if (this instanceof CarroEsportivo) {
+            JOptionPane.showMessageDialog(null, "O carro esportivo não precisa arrumar os freios.");
+        } else if (this instanceof CarroSedan) {
+            freiosOk = true;
+            JOptionPane.showMessageDialog(null, "Os freios foram arrumados.");
         }
+    }
+}
 
+class CarroEsportivo extends Carro {
+    public CarroEsportivo() {
+        super();
+    }
+}
 
-        public double getFuel() {
-            return 0;
-        }
+class CarroSedan extends Carro {
+    private int vidaUtilFreios;
 
+    public CarroSedan() {
+        super();
+        this.vidaUtilFreios = 1000;
+    }
 
-        public void setFuel(double d) {
+    @Override
+    public void andar(double distancia, double velocidade) {
+        super.andar(distancia, velocidade);
+        vidaUtilFreios -= distancia;
+        if (vidaUtilFreios <= 0) {
+            freiosOk = false;
+            JOptionPane.showMessageDialog(null, "Os freios precisam ser arrumados.");
         }
     }
 
-    public static void main(String[] args){
-        JFrame frame = new JFrame("Selecione o modelo de carro");
-        frame.setSize(600, 500);
-        
-        JTextArea outputArea = new JTextArea(10, 30);
-        
-        JScrollPane scrollPane = new JScrollPane(outputArea); 
-        frame.add(scrollPane); 
-        
-        frame.setVisible(true);
-    
-        while (true) {
-            JTextField campoCarro = new JTextField(10);
-            
-            JDialog dialogCarro = new JDialog(frame, "Carro", true);
-            dialogCarro.setLayout(new java.awt.FlowLayout());
-            dialogCarro.add(new JLabel("Modelo de carro (1- esportivo | 2- sedan | 3- Sair):"));
-            dialogCarro.add(campoCarro);
-            
-            JButton carBtn = new JButton("OK");
-            carBtn.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    int modeloCarroSelecionado = Integer.parseInt(campoCarro.getText());
-                    
-                    if (modeloCarroSelecionado == 3) {
-                        System.exit(0);
-                    }
-                    
-                    String carmodelo = modeloCarroSelecionado == 1 ? "esportivo" : "sedan";
-                    car myCar = new car(carmodelo);
-                    
-                    JTextField campoOpcao = new JTextField(10);
-                    
-                    JDialog dialogOpcao = new JDialog(frame, "Opcao", true);
-                    dialogOpcao.setLayout(new java.awt.FlowLayout());
-                    dialogOpcao.add(new JLabel("Escolha uma opcao (1- abastecer | 2- andar | 3- arrumar freios):"));
-                    dialogOpcao.add(campoOpcao);
-                    
-                    JButton opcaoBtn = new JButton("OK");
-                    opcaoBtn.addActionListener(new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            int opcaoSelecionada = Integer.parseInt(campoOpcao.getText());
-                            
-                            if (opcaoSelecionada == 3) {
-                                System.exit(0);
-                            }
-                            
-                            switch(opcaoSelecionada) {
-                                case 1:
-                                    JTextField campoLitros = new JTextField(10);
-    
-                                    JDialog dialogLitros = new JDialog(frame, "Litros", true);
-                                    dialogLitros.setLayout(new java.awt.FlowLayout());
-                                    dialogLitros.add(new JLabel("Quantos litros?"));
-                                    dialogLitros.add(campoLitros);
-    
-                                    JButton litrosBtn = new JButton("OK");
-                                    litrosBtn.addActionListener(new ActionListener() {
-                                        public void actionPerformed(ActionEvent e) {
-                                            double litros = Double.parseDouble(campoLitros.getText());
-                                            
-                                            if (litros > 50) {
-                                                JOptionPane.showMessageDialog(frame, "Tanque nao comporta essa quantidade de combustivel");
-                                                dialogLitros.setVisible(false);
-                                                dialogOpcao.setVisible(false);
-                                                dialogCarro.setVisible(true);
-                                            } else {
-                                                JTextField campoCombustivel = new JTextField(10);
-    
-                                                JDialog dialogCombustiveDialog = new JDialog(frame, "Combustível", true);
-                                                dialogCombustiveDialog.setLayout(new java.awt.FlowLayout());
-                                                dialogCombustiveDialog.add(new JLabel("Combustível (1-Gasolina | 2- Etanol | 3- Diesel):"));
-                                                dialogCombustiveDialog.add(campoCombustivel);
-    
-                                                JButton fuelButton = new JButton("OK");
-                                                fuelButton.addActionListener(new ActionListener() {
-                                                    public void actionPerformed(ActionEvent e) {
-                                                        dialogCombustiveDialog.setVisible(false);
-                                                        
-                                                        dialogLitros.setVisible(false);
-                                                        dialogOpcao.setVisible(false);
-                                                        dialogCarro.setVisible(true);
-                                                    }
-                                                });
-    
-                                                campoCombustivel.addActionListener(new ActionListener() {
-                                                    public void actionPerformed(ActionEvent e) {
-                                                        fuelButton.doClick();
-                                                    }
-                                                });
-    
-                                                dialogCombustiveDialog.add(fuelButton);
-    
-                                                dialogCombustiveDialog.pack();
-                                                dialogCombustiveDialog.setVisible(true);
-    
-                                                String modeloCombustivel;
-                                                int combustivelSelecionado = Integer.parseInt(campoCombustivel.getText());
-                                                switch(combustivelSelecionado) {
-                                                    case 1:
-                                                        modeloCombustivel = "gasolina";
-                                                        break;
-                                                    case 2:
-                                                        modeloCombustivel = "etanol";
-                                                        break;
-                                                    case 3:
-                                                        modeloCombustivel = "diesel";
-                                                        break;
-                                                    default:
-                                                        throw new IllegalArgumentException("Combustivel invalido: " + combustivelSelecionado);
-                                                }
-                                                outputArea.append(myCar.fuel(modeloCombustivel) + "\n");
-                                                
-                                                myCar.setFuel(myCar.getFuel() + litros);
-                                            }
-                                        }
-                                    });
-    
-                                    campoLitros.addActionListener(new ActionListener() {
-                                        public void actionPerformed(ActionEvent e) {
-                                            litrosBtn.doClick();
-                                        }
-                                    });
-    
-                                    dialogLitros.add(litrosBtn);
-    
-                                    dialogLitros.pack();
-                                    dialogLitros.setVisible(true);
-                                    break;
-                                case 2:
-                                    JTextField campoDistancia = new JTextField(10);
-                                    JTextField campoVel = new JTextField(10);
-    
-                                    JDialog dirigeDialog = new JDialog(frame, "Dirigir", true);
-                                    dirigeDialog.setLayout(new java.awt.FlowLayout());
-                                    dirigeDialog.add(new JLabel("Distancia (km):"));
-                                    dirigeDialog.add(campoDistancia);
-                                    dirigeDialog.add(new JLabel("Velocidade (km/h):"));
-                                    dirigeDialog.add(campoVel);
-    
-                                    JButton dirigeBtn = new JButton("Dirigir");
-                                    dirigeBtn.addActionListener(new ActionListener() {
-                                        public void actionPerformed(ActionEvent e) {
-                                            int distancia = Integer.parseInt(campoDistancia.getText());
-                                            int velocidade = Integer.parseInt(campoVel.getText());
-    
-                                            outputArea.append(myCar.drive(distancia, velocidade) + "\n");
-    
-                                            double fuelConsumed = (distancia / 100.0) * myCar.getConsumption() * (velocidade > 120 ? 1.5 : 1.0);
-                                            myCar.setFuel(myCar.getFuel() - fuelConsumed);
-    
-                                            String fuelToAdd = JOptionPane.showInputDialog(frame, "Quantidade de combustível para adicionar (em litros):");
-                                            double fuelToAddDouble = Double.parseDouble(fuelToAdd);
-                                            myCar.setFuel(myCar.getFuel() + fuelToAddDouble);
-    
-                                            dirigeDialog.setVisible(false);
-                                            
-                                            dialogOpcao.setVisible(false);
-                                            dialogCarro.setVisible(true);
-                                        }
-                                    });
-    
-                                    campoVel.addActionListener(new ActionListener() {
-                                        public void actionPerformed(ActionEvent e) {
-                                            dirigeBtn.doClick();
-                                        }
-                                    });
-    
-                                    dirigeDialog.add(dirigeBtn);
-    
-                                    dirigeDialog.pack();
-                                    dirigeDialog.setVisible(true);
-                                    break;
-                                default:
-                                    throw new IllegalArgumentException("Opcao invalida: " + opcaoSelecionada);
-                            }
-                            
-                            dialogOpcao.setVisible(false);
-                        }
-                    });
-                    
-                    campoOpcao.addActionListener(new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            opcaoBtn.doClick();
-                        }
-                    });
-                    
-                    dialogOpcao.add(opcaoBtn);
-                    
-                    dialogOpcao.pack();
-                    dialogOpcao.setVisible(true);
-                    
-                    dialogCarro.setVisible(false);
-                }
-            });
-            
-            campoCarro.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    carBtn.doClick();
-                }
-            });
-            
-            dialogCarro.add(carBtn);
-            
-            dialogCarro.pack();
-            dialogCarro.setVisible(true);
-        }
+    @Override
+    public void arrumarFreios() {
+        vidaUtilFreios = 1000;
+        freiosOk = true;
+        JOptionPane.showMessageDialog(null, "Os freios foram arrumados.");
     }
 }
